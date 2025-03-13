@@ -13,7 +13,6 @@ import {
   DropdownMenuLabel,
 } from "@/components/ui/dropdown-menu"
 import { Button } from "@/components/ui/button"
-// Update the import here as well
 import { usePlaylist } from "@/hooks/use-playlist"
 import type { Song } from "@/providers/playlist-provider"
 import { CreatePlaylistModal } from "./create-playlist-modal"
@@ -57,12 +56,12 @@ export function AddToPlaylistMenu({ song, trigger }: AddToPlaylistMenuProps) {
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           {trigger || (
-            <Button variant="ghost" size="icon">
-              <Plus className="h-4 w-4" />
+            <Button variant="ghost" size="icon" className="h-7 w-7 sm:h-8 sm:w-8">
+              <Plus className="h-3 w-3 sm:h-4 sm:w-4" />
             </Button>
           )}
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-56">
+        <DropdownMenuContent align="end" className="w-48 sm:w-56 text-xs sm:text-sm">
           <DropdownMenuLabel>Add to Playlist</DropdownMenuLabel>
           <DropdownMenuSeparator />
           {playlists.length === 0 ? (
@@ -80,9 +79,9 @@ export function AddToPlaylistMenu({ song, trigger }: AddToPlaylistMenuProps) {
                   className="flex items-center justify-between"
                 >
                   <span className="truncate">{playlist.name}</span>
-                  {isInPlaylist && <Check className="h-4 w-4 text-primary" />}
+                  {isInPlaylist && <Check className="h-3 w-3 sm:h-4 sm:w-4 text-primary" />}
                   {isLoading === playlist.id && (
-                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+                    <div className="h-3 w-3 sm:h-4 sm:w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
                   )}
                 </DropdownMenuItem>
               )
@@ -90,7 +89,7 @@ export function AddToPlaylistMenu({ song, trigger }: AddToPlaylistMenuProps) {
           )}
           <DropdownMenuSeparator />
           <DropdownMenuItem onClick={() => setIsCreatePlaylistOpen(true)}>
-            <Plus className="mr-2 h-4 w-4" />
+            <Plus className="mr-2 h-3 w-3 sm:h-4 sm:w-4" />
             Create New Playlist
           </DropdownMenuItem>
         </DropdownMenuContent>

@@ -1,7 +1,7 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
-import { Play, Pause, SkipBack, SkipForward, Volume2, VolumeX, ListMusic, Loader2 } from "lucide-react"
+import { useState, useEffect, useRef, useCallback, memo } from "react"
+import { Play, Pause, SkipBack, SkipForward, Volume2, VolumeX, ListMusic, Loader2 } from 'lucide-react'
 import { Slider } from "@/components/ui/slider"
 import { Button } from "@/components/ui/button"
 import { usePlayback } from "@/providers/playback-provider"
@@ -10,6 +10,109 @@ import { useMobile } from "@/hooks/use-mobile"
 import { cn } from "@/lib/utils"
 import { Badge } from "@/components/ui/badge"
 import { songPaymentTiers } from "@/data/songs"
+import { throttle } from "@/lib/performance"
+
+// Memoized player controls to prevent unnecessary re-renders
+const PlayerControls = memo(function PlayerControls({
+  isPlaying,
+  isBuffering,
+  togglePlayPause,
+  previousSong,
+  nextSong,
+  isMobile,
+}: {
+  isPlaying: boolean
+  isBuffering: boolean
+  togglePlayPause: () => void
+  previousSong: () => void
+  nextSong: () => void
+  isMobile: boolean
+}) {
+  return (
+    <div className="flex items-center gap-1 sm:gap-2">
+      {!isMobile && (
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={previousSong}
+          className="transition-transform duration-200 hover:scale-110 h-8 w-8 sm:h-10 sm:w-10"
+        >
+          <SkipBack className="h-4 w-4 sm:h-5 sm:w-5" />
+        </Button>
+      )}
+      <Button
+        variant="outline"
+        size="icon"
+        className="h-8 w-8 sm:h-10 sm:w-10 rounded-full transition-transform duration-300 hover:scale-110 relative overflow-hidden"
+        onClick={togglePlayPause}
+        disabled={isBuffering}
+      >
+        {isBuffering ? (
+          <Loader2 className="h-4 w-4 sm:h-5 sm:w-5 animate-spin" />
+        ) : isPlaying ? (
+          <Pause className="h-4 w-4 sm:h-5 sm:w-5 animate-in fade-in duration-200" />
+        ) : (
+          <Play className="h-4 w-4 sm:h-5 sm:w-5 animate-in fade-in duration-200" />
+        )}
+        {isPlaying && <span className="absolute inset-0 rounded-full animate-pulse-ring"></span>}
+      </Button>
+      {!isMobile && (
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={nextSong}
+          className="transition-transform duration-200 hover:scale-110 h-8 w-8 sm:h-10 sm:w-10"
+        >
+          <SkipForward className="h-4 w-4 sm:h-5 sm:w-5" />
+        </Button>
+      )}
+    </div>
+  )
+})
+
+// Memoized progress bar to prevent unnecessary re-renders
+const ProgressBar = memo(function ProgressBar({
+  currentTime,
+  duration,
+  onSeek,
+}: {
+  currentTime: number
+  duration: number
+  onSeek: (value: number) => void
+}) {
+  // Throttle seek updates to improve performance
+  const handleSeek = useCallback(
+    throttle((value: number[]) => {
+      onSeek(value[0])
+    }, 100),
+    [onSeek],
+  )
+
+  return (
+    <div className="flex items-center gap-1 sm:gap-2 w-full mt-1">
+      <span className="text-xs text-muted-foreground w-8 sm:w-10 text-right">{formatTime(currentTime)}</span>
+      <Slider value={[currentTime]} max={duration || 100} step={1} onValueChange={handleSeek} className="w-full" />
+      <span className="text-xs text-muted-foreground w-8 sm:w-10">{formatTime(duration)}</span>
+    </div>
+  )
+})
+
+// Memoized payment display
+const PaymentDisplay = memo(function PaymentDisplay({
+  paymentRate,
+  totalPaid,
+}: {
+  paymentRate: number | null
+  totalPaid: number
+}) {
+  if (!paymentRate) return null
+
+  return (
+    <div className="text-xs text-muted-foreground mt-1 animate-pulse">
+      Paying {paymentRate.toFixed(6)} ETH/sec | Total: {totalPaid.toFixed(6)} ETH
+    </div>
+  )
+})
 
 export function Player() {
   const {
@@ -34,6 +137,14 @@ export function Player() {
   const [totalPaid, setTotalPaid] = useState(0)
   const volumeRef = useRef<HTMLDivElement>(null)
   const isMobile = useMobile()
+
+  // Memoize the seek function to prevent unnecessary re-renders
+  const handleSeek = useCallback(
+    (time: number) => {
+      seek(time)
+    },
+    [seek],
+  )
 
   useEffect(() => {
     setMounted(true)
@@ -76,89 +187,48 @@ export function Player() {
     }
 
     return (
-      <Badge variant="outline" className={cn("ml-2", colors[tier])}>
+      <Badge variant="outline" className={cn("ml-2 text-xs", colors[tier])}>
         {tier.charAt(0) + tier.slice(1).toLowerCase()}
       </Badge>
     )
   }
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 border-t bg-background p-2">
+    <div className="fixed bottom-0 left-0 right-0 z-50 border-t bg-background p-2 will-change-transform">
       <div className="container mx-auto flex items-center justify-between max-w-7xl">
-        <div className={cn("flex items-center gap-3", isMobile ? "w-1/2" : "w-1/3")}>
-          <div className="h-12 w-12 rounded-md overflow-hidden bg-muted flex-shrink-0 transition-transform duration-300 hover:scale-105">
+        <div className={cn("flex items-center gap-2 sm:gap-3", isMobile ? "w-1/2" : "w-1/3")}>
+          <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-md overflow-hidden bg-muted flex-shrink-0 transition-transform duration-300 hover:scale-105">
             <img
               src={currentSong.coverUrl || "/placeholder.svg?height=48&width=48"}
               alt={currentSong.title}
               className="h-full w-full object-cover"
+              loading="eager"
+              fetchPriority="high"
             />
           </div>
           <div className="truncate">
-            <div className="font-medium truncate flex items-center">
+            <div className="font-medium truncate flex items-center text-sm sm:text-base">
               {currentSong.title}
-              {getTierBadge()}
+              {!isMobile && getTierBadge()}
             </div>
             <div className="text-xs text-muted-foreground truncate">{currentSong.artist}</div>
           </div>
         </div>
 
         <div className={cn("flex flex-col items-center", isMobile ? "w-1/2" : "w-1/3")}>
-          <div className="flex items-center gap-2">
-            {!isMobile && (
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={previousSong}
-                className="transition-transform duration-200 hover:scale-110"
-              >
-                <SkipBack className="h-5 w-5" />
-              </Button>
-            )}
-            <Button
-              variant="outline"
-              size="icon"
-              className="h-10 w-10 rounded-full transition-transform duration-300 hover:scale-110 relative overflow-hidden"
-              onClick={togglePlayPause}
-              disabled={isBuffering}
-            >
-              {isBuffering ? (
-                <Loader2 className="h-5 w-5 animate-spin" />
-              ) : isPlaying ? (
-                <Pause className="h-5 w-5 animate-in fade-in duration-200" />
-              ) : (
-                <Play className="h-5 w-5 animate-in fade-in duration-200" />
-              )}
-              {isPlaying && <span className="absolute inset-0 rounded-full animate-pulse-ring"></span>}
-            </Button>
-            {!isMobile && (
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={nextSong}
-                className="transition-transform duration-200 hover:scale-110"
-              >
-                <SkipForward className="h-5 w-5" />
-              </Button>
-            )}
-          </div>
+          <PlayerControls
+            isPlaying={isPlaying}
+            isBuffering={isBuffering}
+            togglePlayPause={togglePlayPause}
+            previousSong={previousSong}
+            nextSong={nextSong}
+            isMobile={isMobile}
+          />
+
           {!isMobile && (
             <>
-              <div className="flex items-center gap-2 w-full mt-1">
-                <span className="text-xs text-muted-foreground w-10 text-right">{formatTime(currentTime)}</span>
-                <Slider
-                  value={[currentTime]}
-                  max={duration || 100}
-                  step={1}
-                  onValueChange={(value) => seek(value[0])}
-                  className="w-full"
-                />
-                <span className="text-xs text-muted-foreground w-10">{formatTime(duration)}</span>
-              </div>
-              {paymentRate && (
-                <div className="text-xs text-muted-foreground mt-1 animate-pulse">
-                  Paying {paymentRate.toFixed(6)} ETH/sec | Total: {totalPaid.toFixed(6)} ETH
-                </div>
-              )}
+              <ProgressBar currentTime={currentTime} duration={duration} onSeek={handleSeek} />
+              <PaymentDisplay paymentRate={paymentRate} totalPaid={totalPaid} />
             </>
           )}
         </div>
@@ -171,9 +241,9 @@ export function Player() {
                 size="icon"
                 onClick={toggleMute}
                 onMouseEnter={() => setShowVolumeSlider(true)}
-                className="transition-transform duration-200 hover:scale-110"
+                className="transition-transform duration-200 hover:scale-110 h-8 w-8 sm:h-10 sm:w-10"
               >
-                {isMuted ? <VolumeX className="h-5 w-5" /> : <Volume2 className="h-5 w-5" />}
+                {isMuted ? <VolumeX className="h-4 w-4 sm:h-5 sm:w-5" /> : <Volume2 className="h-4 w-4 sm:h-5 sm:w-5" />}
               </Button>
               {showVolumeSlider && (
                 <div className="absolute bottom-full right-0 mb-2 p-2 bg-background border rounded-md shadow-md w-32 animate-in fade-in slide-in-from-bottom-2 duration-200">
@@ -186,8 +256,12 @@ export function Player() {
                 </div>
               )}
             </div>
-            <Button variant="ghost" size="icon" className="transition-transform duration-200 hover:scale-110">
-              <ListMusic className="h-5 w-5" />
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="transition-transform duration-200 hover:scale-110 h-8 w-8 sm:h-10 sm:w-10"
+            >
+              <ListMusic className="h-4 w-4 sm:h-5 sm:w-5" />
             </Button>
           </div>
         )}
@@ -195,4 +269,3 @@ export function Player() {
     </div>
   )
 }
-

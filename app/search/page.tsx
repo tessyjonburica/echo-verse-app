@@ -54,9 +54,9 @@ export default function SearchPage() {
   if (!authenticated) {
     return (
       <MainLayout>
-        <div className="flex flex-col items-center justify-center py-20 text-center">
-          <h1 className="text-4xl font-bold mb-4">Search Music</h1>
-          <p className="text-xl text-muted-foreground mb-8 max-w-2xl">
+        <div className="flex flex-col items-center justify-center py-12 sm:py-20 text-center px-4">
+          <h1 className="text-3xl sm:text-4xl font-bold mb-4">Search Music</h1>
+          <p className="text-base sm:text-xl text-muted-foreground mb-6 sm:mb-8 max-w-2xl">
             Connect to search and discover your favorite songs.
           </p>
           <Button
@@ -73,10 +73,10 @@ export default function SearchPage() {
 
   return (
     <MainLayout>
-      <div className="space-y-6">
-        <h1 className="text-3xl font-bold">Search</h1>
+      <div className="space-y-4 sm:space-y-6">
+        <h1 className="text-2xl sm:text-3xl font-bold">Search</h1>
 
-        <form onSubmit={handleSearch} className="flex gap-2">
+        <form onSubmit={handleSearch} className="flex flex-col sm:flex-row gap-2">
           <div className="relative flex-1">
             <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
@@ -99,14 +99,16 @@ export default function SearchPage() {
           </Button>
         </form>
 
-        <div className="mt-8">
+        <div className="mt-6 sm:mt-8">
           {searchResults.length === 0 ? (
-            <div className="text-center py-12 animate-in fade-in slide-in-from-bottom-5 duration-300">
-              <h3 className="text-xl font-medium mb-2">No results found</h3>
-              <p className="text-muted-foreground">Try searching for something else or check your spelling</p>
+            <div className="text-center py-8 sm:py-12 animate-in fade-in slide-in-from-bottom-5 duration-300">
+              <h3 className="text-lg sm:text-xl font-medium mb-2">No results found</h3>
+              <p className="text-sm sm:text-base text-muted-foreground">
+                Try searching for something else or check your spelling
+              </p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 animate-in fade-in slide-in-from-bottom-5 duration-300">
+            <div className="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 animate-in fade-in slide-in-from-bottom-5 duration-300">
               {searchResults.map((song, index) => (
                 <SongCard key={song.id} song={song} index={index} songs={searchResults} />
               ))}

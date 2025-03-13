@@ -14,7 +14,6 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-// Update the import here as well
 import { usePlaylist } from "@/hooks/use-playlist"
 
 interface CreatePlaylistModalProps {
@@ -65,7 +64,7 @@ export function CreatePlaylistModal({ open, onOpenChange }: CreatePlaylistModalP
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Create Playlist</DialogTitle>
           <DialogDescription>Create a new playlist to organize your favorite songs.</DialogDescription>
@@ -86,11 +85,11 @@ export function CreatePlaylistModal({ open, onOpenChange }: CreatePlaylistModalP
             />
           </div>
         </div>
-        <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
+        <DialogFooter className="flex-col sm:flex-row gap-2 sm:gap-0">
+          <Button variant="outline" onClick={() => onOpenChange(false)} className="w-full sm:w-auto">
             Cancel
           </Button>
-          <Button onClick={handleSubmit} disabled={!name.trim() || isLoading}>
+          <Button onClick={handleSubmit} disabled={!name.trim() || isLoading} className="w-full sm:w-auto">
             {isLoading ? "Creating..." : "Create Playlist"}
           </Button>
         </DialogFooter>

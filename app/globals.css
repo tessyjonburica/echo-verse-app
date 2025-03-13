@@ -2,6 +2,19 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Optimize font loading */
+@layer base {
+  @font-face {
+    font-family: "Inter";
+    font-style: normal;
+    font-weight: 100 900;
+    font-display: swap;
+    src: url("/fonts/inter-var.woff2") format("woff2");
+    unicode-range:
+      U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+  }
+}
+
 @layer base {
   :root {
     --background: 0 0% 100%;
@@ -72,6 +85,28 @@
   }
   body {
     @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+
+  /* Optimize scrolling */
+  html {
+    scroll-behavior: smooth;
+  }
+
+  /* Optimize rendering performance */
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+
+    *,
+    ::before,
+    ::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
   }
 }
 
@@ -81,6 +116,18 @@
   }
   .animation-delay-500 {
     animation-delay: 0.5s;
+  }
+
+  /* Hardware acceleration classes */
+  .gpu-accelerated {
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    perspective: 1000px;
+  }
+
+  /* Optimize text rendering */
+  .optimize-legibility {
+    text-rendering: optimizeLegibility;
   }
 }
 
@@ -139,5 +186,28 @@ a,
   opacity: 0;
   transform: translateY(-10px);
   transition: opacity 300ms, transform 300ms;
+}
+
+/* Optimize images */
+img {
+  content-visibility: auto;
+}
+
+/* Optimize layout shifts */
+.content-wrapper {
+  content-visibility: auto;
+  contain-intrinsic-size: 0 500px;
+}
+
+/* Optimize animations */
+@media (prefers-reduced-motion: no-preference) {
+  .animate-on-scroll {
+    animation-play-state: paused;
+    animation-fill-mode: both;
+  }
+
+  .animate-on-scroll.is-visible {
+    animation-play-state: running;
+  }
 }
 

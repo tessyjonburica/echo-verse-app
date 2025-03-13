@@ -78,14 +78,14 @@ export function Sidebar() {
     )
   }
 
-  const sidebarWidth = collapsed ? "w-16" : "w-64"
+  const sidebarWidth = collapsed ? "w-14 sm:w-16" : "w-56 sm:w-64"
   const sidebarClass = cn(
     "bg-background fixed left-0 top-0 z-40 flex h-full flex-col border-r transition-all duration-300 ease-in-out",
     sidebarWidth,
   )
 
   const navItems = [
-    { icon: Home, label: "Home", href: "/" },
+    { icon: Home, label: "Home", href: "/home" },
     { icon: Library, label: "Library", href: "/library" },
     { icon: Search, label: "Search", href: "/search" },
     { icon: Settings, label: "Settings", href: "/settings" },
@@ -105,42 +105,47 @@ export function Sidebar() {
   return (
     <>
       <aside className={sidebarClass}>
-        <div className="flex items-center justify-between p-4">
+        <div className="flex items-center justify-between p-3 sm:p-4">
           <div className={cn("flex items-center gap-2", collapsed && "justify-center")}>
             {!collapsed && (
-              <span className="text-xl font-bold animate-in fade-in slide-in-from-left-5 duration-300">Echo Verse</span>
+              <span className="text-base sm:text-xl font-bold animate-in fade-in slide-in-from-left-5 duration-300">
+                Echo Verse
+              </span>
             )}
           </div>
           <Button
             variant="ghost"
             size="icon"
             onClick={toggleSidebar}
-            className={cn("hidden md:flex transition-transform duration-200 hover:scale-110", collapsed && "ml-auto")}
+            className={cn(
+              "hidden md:flex transition-transform duration-200 hover:scale-110 h-7 w-7 sm:h-8 sm:w-8",
+              collapsed && "ml-auto",
+            )}
             aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
           >
-            {collapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
+            {collapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
           </Button>
         </div>
 
         {authenticated && (
-          <div className={cn("flex items-center p-4", collapsed ? "justify-center" : "justify-between")}>
+          <div className={cn("flex items-center p-3 sm:p-4", collapsed ? "justify-center" : "justify-between")}>
             <div className="flex items-center gap-2">
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <div className="relative transition-transform duration-200 hover:scale-110">
-                      <Avatar className="h-8 w-8">
+                      <Avatar className="h-7 w-7 sm:h-8 sm:w-8">
                         <AvatarImage src="/placeholder.svg?height=32&width=32" alt="User" />
                         <AvatarFallback>
-                          <AuthIcon size={16} />
+                          <AuthIcon size={14} />
                         </AvatarFallback>
                       </Avatar>
                       {hasLinkedEmail() && (
                         <Badge
-                          className="absolute -bottom-1 -right-1 h-4 w-4 p-0 flex items-center justify-center bg-green-500 animate-pulse"
+                          className="absolute -bottom-1 -right-1 h-3 w-3 sm:h-4 sm:w-4 p-0 flex items-center justify-center bg-green-500 animate-pulse"
                           aria-label="Email verified"
                         >
-                          <Mail className="h-2.5 w-2.5 text-white" />
+                          <Mail className="h-2 w-2 sm:h-2.5 sm:w-2.5 text-white" />
                         </Badge>
                       )}
                     </div>
@@ -150,8 +155,12 @@ export function Sidebar() {
               </TooltipProvider>
               {!collapsed && (
                 <div className="flex flex-col animate-in fade-in slide-in-from-left-5 duration-300">
-                  <span className="text-sm font-medium truncate max-w-[160px]">{displayName}</span>
-                  <span className="text-xs text-muted-foreground truncate max-w-[160px]">{accountType}</span>
+                  <span className="text-xs sm:text-sm font-medium truncate max-w-[140px] sm:max-w-[160px]">
+                    {displayName}
+                  </span>
+                  <span className="text-xs text-muted-foreground truncate max-w-[140px] sm:max-w-[160px]">
+                    {accountType}
+                  </span>
                 </div>
               )}
             </div>
@@ -161,9 +170,9 @@ export function Sidebar() {
                 size="icon"
                 onClick={() => logout()}
                 title="Disconnect"
-                className="transition-transform duration-200 hover:scale-110 hover:text-destructive"
+                className="transition-transform duration-200 hover:scale-110 hover:text-destructive h-7 w-7 sm:h-8 sm:w-8"
               >
-                <LogOut size={18} />
+                <LogOut size={16} />
               </Button>
             )}
           </div>
@@ -173,22 +182,22 @@ export function Sidebar() {
 
         <nav className="flex-1">
           <ScrollArea className="h-full">
-            <div className="px-3 py-2">
+            <div className="px-2 sm:px-3 py-2">
               <div className="space-y-1">
                 {navItems.map((item) => (
                   <Link
                     key={item.href}
                     href={item.href}
                     className={cn(
-                      "flex items-center rounded-md text-sm font-medium transition-all duration-200",
+                      "flex items-center rounded-md text-xs sm:text-sm font-medium transition-all duration-200",
                       pathname === item.href
                         ? "bg-primary text-primary-foreground"
                         : "hover:bg-accent hover:text-accent-foreground hover:scale-105",
-                      collapsed ? "justify-center h-10 w-10 mx-auto p-0" : "px-3 py-2",
+                      collapsed ? "justify-center h-9 w-9 sm:h-10 sm:w-10 mx-auto p-0" : "px-2 sm:px-3 py-2",
                     )}
                     title={collapsed ? item.label : undefined}
                   >
-                    <item.icon className={cn("h-5 w-5", collapsed ? "" : "mr-2")} />
+                    <item.icon className={cn("h-4 w-4 sm:h-5 sm:w-5", collapsed ? "" : "mr-2")} />
                     {!collapsed && (
                       <span className="animate-in fade-in slide-in-from-left-5 duration-300">{item.label}</span>
                     )}
@@ -196,12 +205,12 @@ export function Sidebar() {
                 ))}
               </div>
 
-              <Separator className="my-4" />
+              <Separator className="my-3 sm:my-4" />
 
               <div className="space-y-1">
-                <div className="flex items-center justify-between px-3 py-2">
+                <div className="flex items-center justify-between px-2 sm:px-3 py-2">
                   {!collapsed && (
-                    <h2 className="text-sm font-semibold animate-in fade-in slide-in-from-left-5 duration-300">
+                    <h2 className="text-xs sm:text-sm font-semibold animate-in fade-in slide-in-from-left-5 duration-300">
                       Playlists
                     </h2>
                   )}
@@ -210,12 +219,12 @@ export function Sidebar() {
                     size="icon"
                     onClick={() => setIsCreatePlaylistOpen(true)}
                     className={cn(
-                      "transition-transform duration-200 hover:scale-110",
-                      collapsed && "mx-auto h-10 w-10 p-0",
+                      "transition-transform duration-200 hover:scale-110 h-7 w-7 sm:h-8 sm:w-8",
+                      collapsed && "mx-auto p-0",
                     )}
                     title="Create Playlist"
                   >
-                    <PlusCircle className="h-5 w-5" />
+                    <PlusCircle className="h-4 w-4 sm:h-5 sm:w-5" />
                   </Button>
                 </div>
                 <div className="space-y-1">
@@ -224,17 +233,17 @@ export function Sidebar() {
                       key={playlist.id}
                       href={`/playlist/${playlist.id}`}
                       className={cn(
-                        "flex items-center rounded-md text-sm font-medium transition-all duration-200",
+                        "flex items-center rounded-md text-xs sm:text-sm font-medium transition-all duration-200",
                         pathname === `/playlist/${playlist.id}`
                           ? "bg-primary text-primary-foreground"
                           : "hover:bg-accent hover:text-accent-foreground hover:scale-105",
-                        collapsed ? "justify-center h-10 w-10 mx-auto p-0" : "px-3 py-2",
+                        collapsed ? "justify-center h-9 w-9 sm:h-10 sm:w-10 mx-auto p-0" : "px-2 sm:px-3 py-2",
                       )}
                       title={collapsed ? playlist.name : undefined}
                     >
-                      <ListMusic className={cn("h-5 w-5", collapsed ? "" : "mr-2")} />
+                      <ListMusic className={cn("h-4 w-4 sm:h-5 sm:w-5", collapsed ? "" : "mr-2")} />
                       {!collapsed && (
-                        <span className="truncate max-w-[180px] animate-in fade-in slide-in-from-left-5 duration-300">
+                        <span className="truncate max-w-[140px] sm:max-w-[180px] animate-in fade-in slide-in-from-left-5 duration-300">
                           {playlist.name}
                         </span>
                       )}
