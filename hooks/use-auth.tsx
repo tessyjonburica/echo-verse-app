@@ -12,15 +12,16 @@ export interface Wallet {
 }
 
 export interface User {
-  id: string
-  email?: string
-  displayName?: string
-  wallet?: Wallet
+  id: string;
+  email?: string;
+  displayName?: string;
+  wallet?: Wallet;
   linkedAccounts?: {
-    email?: { address: string; verified: boolean }
-    wallet?: Wallet[]
-  }
+    email?: { address: string; verified: boolean };
+    wallet?: Wallet[];
+  };
 }
+
 
 export function useAuth() {
   const [mounted, setMounted] = useState(false)
@@ -56,29 +57,28 @@ export function useAuth() {
 
   // Helper function to get primary identifier (email or wallet)
   const getPrimaryIdentifier = (user: User | null): string => {
-    if (!user) return "Guest"
-
+    if (!user) return "Guest";
+  
     // If user has a custom display name, use that
     if (user.displayName) {
-      return user.displayName
+      return user.displayName;
     }
-
+  
     if (typeof user.email === "string" && user.email) {
-      return user.email
+      return user.email;
     }
-
+  
     if (user.linkedAccounts?.email?.address) {
-      return user.linkedAccounts.email.address
+      return user.linkedAccounts.email.address;
     }
-
-    const walletAddress = getWalletAddress(user)
+  
+    const walletAddress = getWalletAddress(user);
     if (walletAddress) {
-      return `${walletAddress.slice(0, 6)}...${walletAddress.slice(-4)}`
+      return `${walletAddress.slice(0, 6)}...${walletAddress.slice(-4)}`;
     }
-
-    return "Guest"
-  }
-
+  
+    return "Guest";
+  };
   // Helper function to check if user has a linked wallet
   const hasLinkedWallet = (user: User | null): boolean => {
     if (!user) return false

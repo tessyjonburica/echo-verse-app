@@ -1,19 +1,27 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useEffect, useState } from "react"
-import { MainLayout } from "@/components/layout/main-layout"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Switch } from "@/components/ui/switch"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { useAuth } from "@/hooks/use-auth"
-import { useToast } from "@/hooks/use-toast"
-import { Wallet, Mail, Plus, Trash2, Check, AlertCircle } from "lucide-react"
-import { Badge } from "@/components/ui/badge"
+import { useEffect, useState } from "react";
+import { MainLayout } from "@/components/layout/main-layout";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useAuth } from "@/hooks/use-auth";
+import { useToast } from "@/hooks/use-toast";
+import { Wallet, Mail, Plus, Trash2, Check, AlertCircle } from "lucide-react";
+import { User } from "@/hooks/use-auth";
+import { Badge } from "@/components/ui/badge";
 import {
   Dialog,
   DialogContent,
@@ -22,8 +30,8 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/custom-dialog"
-import { Alert, AlertDescription } from "@/components/ui/alert"
+} from "@/components/ui/custom-dialog";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 export default function SettingsPage() {
   const {
@@ -37,199 +45,209 @@ export default function SettingsPage() {
     hasLinkedEmail,
     hasLinkedWallet,
     getPrimaryIdentifier,
-  } = useAuth()
-  const { toast } = useToast()
-  const [mounted, setMounted] = useState(false)
+  } = useAuth();
+  const { toast } = useToast();
+  const [mounted, setMounted] = useState(false);
 
   // Profile settings
-  const [displayName, setDisplayName] = useState("")
-  const [email, setEmail] = useState("")
-  const [originalDisplayName, setOriginalDisplayName] = useState("")
-  const [originalEmail, setOriginalEmail] = useState("")
-  const [isUpdatingProfile, setIsUpdatingProfile] = useState(false)
-  const [profileChanged, setProfileChanged] = useState(false)
-  const [emailError, setEmailError] = useState("")
-  const [displayNameError, setDisplayNameError] = useState("")
+  const [displayName, setDisplayName] = useState("");
+  const [email, setEmail] = useState("");
+  const [originalDisplayName, setOriginalDisplayName] = useState("");
+  const [originalEmail, setOriginalEmail] = useState("");
+  const [isUpdatingProfile, setIsUpdatingProfile] = useState(false);
+  const [profileChanged, setProfileChanged] = useState(false);
+  const [emailError, setEmailError] = useState("");
+  const [displayNameError, setDisplayNameError] = useState("");
 
   // Wallet settings
-  const [newWalletAddress, setNewWalletAddress] = useState("")
-  const [isLinkingWallet, setIsLinkingWallet] = useState(false)
-  const [isDialogOpen, setIsDialogOpen] = useState(false)
+  const [newWalletAddress, setNewWalletAddress] = useState("");
+  const [isLinkingWallet, setIsLinkingWallet] = useState(false);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   // Appearance settings
-  const [darkMode, setDarkMode] = useState(false)
-  const [highContrast, setHighContrast] = useState(false)
-  const [reducedMotion, setReducedMotion] = useState(false)
+  const [darkMode, setDarkMode] = useState(false);
+  const [highContrast, setHighContrast] = useState(false);
+  const [reducedMotion, setReducedMotion] = useState(false);
 
   // Playback settings
-  const [autoplay, setAutoplay] = useState(true)
-  const [crossfade, setCrossfade] = useState(false)
-  const [normalizeVolume, setNormalizeVolume] = useState(true)
+  const [autoplay, setAutoplay] = useState(true);
+  const [crossfade, setCrossfade] = useState(false);
+  const [normalizeVolume, setNormalizeVolume] = useState(true);
 
   // Privacy settings
-  const [shareListening, setShareListening] = useState(true)
-  const [showActivity, setShowActivity] = useState(true)
+  const [shareListening, setShareListening] = useState(true);
+  const [showActivity, setShowActivity] = useState(true);
 
   useEffect(() => {
-    setMounted(true)
+    setMounted(true);
 
     // Initialize form with user data if available
     if (user) {
-      // Get display name from primary identifier or user's custom display name
-      const displayNameValue = user.displayName || getPrimaryIdentifier()
-      setDisplayName(displayNameValue)
-      setOriginalDisplayName(displayNameValue)
+      // Safely access displayName with optional chaining and provide a fallback
+      const displayName = (user as User)?.displayName || getPrimaryIdentifier();
+      setDisplayName(displayName);
+      setOriginalDisplayName(displayName);
 
-      // Set email if available
-      let userEmail = ""
-      if (typeof user.email === "string") {
-        userEmail = user.email
-      } else if (user.linkedAccounts?.email?.address) {
-        userEmail = user.linkedAccounts.email.address
+      // Safely access email
+      let userEmail = "";
+      if (typeof user?.email === "string") {
+        userEmail = user.email;
+      } else if (user?.linkedAccounts && !Array.isArray(user.linkedAccounts)) {
+        // Handle case where linkedAccounts is an object
+        userEmail = user.linkedAccounts.email?.address || "";
+      } else if (user?.linkedAccounts && Array.isArray(user.linkedAccounts)) {
+        // Handle case where linkedAccounts is an array
+        const emailAccount = user.linkedAccounts.find(
+          (account) => account.type === "email"
+        );
+        userEmail = emailAccount?.address || "";
       }
-      setEmail(userEmail)
-      setOriginalEmail(userEmail)
+      setEmail(userEmail);
+      setOriginalEmail(userEmail);
     }
 
     return () => {
-      setMounted(false)
-    }
-  }, [user, getPrimaryIdentifier])
+      setMounted(false);
+    };
+  }, [user, getPrimaryIdentifier]);
 
   // Check if profile has changed
   useEffect(() => {
-    const hasChanged = displayName !== originalDisplayName || email !== originalEmail
-    setProfileChanged(hasChanged)
+    const hasChanged =
+      displayName !== originalDisplayName || email !== originalEmail;
+    setProfileChanged(hasChanged);
 
     // Clear errors when fields change
     if (displayName !== originalDisplayName) {
-      setDisplayNameError("")
+      setDisplayNameError("");
     }
     if (email !== originalEmail) {
-      setEmailError("")
+      setEmailError("");
     }
-  }, [displayName, email, originalDisplayName, originalEmail])
+  }, [displayName, email, originalDisplayName, originalEmail]);
 
   const validateForm = (): boolean => {
-    let isValid = true
+    let isValid = true;
 
     // Validate display name
     if (!displayName.trim()) {
-      setDisplayNameError("Display name is required")
-      isValid = false
+      setDisplayNameError("Display name is required");
+      isValid = false;
     } else {
-      setDisplayNameError("")
+      setDisplayNameError("");
     }
 
     // Validate email format if provided
     if (email && !isValidEmail(email)) {
-      setEmailError("Please enter a valid email address")
-      isValid = false
+      setEmailError("Please enter a valid email address");
+      isValid = false;
     } else {
-      setEmailError("")
+      setEmailError("");
     }
 
-    return isValid
-  }
+    return isValid;
+  };
 
   const handleUpdateProfile = async (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
 
     if (!validateForm()) {
-      return
+      return;
     }
 
-    setIsUpdatingProfile(true)
+    setIsUpdatingProfile(true);
 
     try {
-      const success = await updateProfile(displayName.trim(), email.trim())
+      const success = await updateProfile(displayName.trim(), email.trim());
 
       if (success) {
         // Update original values to reflect saved state
-        setOriginalDisplayName(displayName.trim())
-        setOriginalEmail(email.trim())
-        setProfileChanged(false)
+        setOriginalDisplayName(displayName.trim());
+        setOriginalEmail(email.trim());
+        setProfileChanged(false);
 
         toast({
           title: "Profile updated",
-          description: "Your profile information has been updated successfully.",
-          icon: <Check className="h-4 w-4" />,
-        })
+          description:
+            "Your profile information has been updated successfully.",
+        });
       }
     } catch (error) {
-      console.error("Error updating profile:", error)
+      console.error("Error updating profile:", error);
       toast({
         title: "Error updating profile",
-        description: "There was an error updating your profile. Please try again.",
+        description:
+          "There was an error updating your profile. Please try again.",
         variant: "destructive",
-      })
+      });
     } finally {
-      setIsUpdatingProfile(false)
+      setIsUpdatingProfile(false);
     }
-  }
+  };
 
   const isValidEmail = (email: string) => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-    return emailRegex.test(email)
-  }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
 
   const handleLinkWallet = async (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
 
     if (!newWalletAddress || !newWalletAddress.startsWith("0x")) {
       toast({
         title: "Invalid wallet address",
-        description: "Please enter a valid Ethereum wallet address starting with 0x.",
+        description:
+          "Please enter a valid Ethereum wallet address starting with 0x.",
         variant: "destructive",
-      })
-      return
+      });
+      return;
     }
 
-    setIsLinkingWallet(true)
+    setIsLinkingWallet(true);
 
     try {
-      await linkWallet(newWalletAddress)
-      setNewWalletAddress("")
-      setIsDialogOpen(false)
+      await linkWallet(newWalletAddress);
+      setNewWalletAddress("");
+      setIsDialogOpen(false);
     } catch (error) {
-      console.error("Error linking wallet:", error)
+      console.error("Error linking wallet:", error);
     } finally {
-      setIsLinkingWallet(false)
+      setIsLinkingWallet(false);
     }
-  }
+  };
 
   const handleUnlinkWallet = async (address: string) => {
-    if (!address) return
+    if (!address) return;
 
     try {
-      await unlinkWallet(address)
+      await unlinkWallet(address);
     } catch (error) {
-      console.error("Error unlinking wallet:", error)
+      console.error("Error unlinking wallet:", error);
     }
-  }
+  };
 
   const handleSaveAppearance = () => {
     toast({
       title: "Appearance settings saved",
       description: "Your appearance preferences have been updated.",
-    })
-  }
+    });
+  };
 
   const handleSavePlayback = () => {
     toast({
       title: "Playback settings saved",
       description: "Your playback preferences have been updated.",
-    })
-  }
+    });
+  };
 
   const handleSavePrivacy = () => {
     toast({
       title: "Privacy settings saved",
       description: "Your privacy preferences have been updated.",
-    })
-  }
+    });
+  };
 
-  if (!mounted) return null
+  if (!mounted) return null;
 
   if (!authenticated) {
     return (
@@ -251,12 +269,12 @@ export default function SettingsPage() {
           </div>
         </div>
       </MainLayout>
-    )
+    );
   }
 
   // Get linked wallets - ensure we're not rendering objects directly
-  const linkedWallets = user?.linkedAccounts?.wallet || []
-  const hasWallet = linkedWallets.length > 0
+  const linkedWallets = user?.linkedAccounts?.wallet || [];
+  const hasWallet = linkedWallets.length > 0;
 
   return (
     <MainLayout>
@@ -275,12 +293,17 @@ export default function SettingsPage() {
             <Card>
               <CardHeader>
                 <CardTitle>Profile Settings</CardTitle>
-                <CardDescription>Manage your account information and preferences.</CardDescription>
+                <CardDescription>
+                  Manage your account information and preferences.
+                </CardDescription>
               </CardHeader>
               <form onSubmit={handleUpdateProfile}>
                 <CardContent className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="displayName" className="flex items-center justify-between">
+                    <Label
+                      htmlFor="displayName"
+                      className="flex items-center justify-between"
+                    >
                       Display Name
                       {displayNameError && (
                         <span className="text-xs font-normal text-destructive flex items-center">
@@ -301,7 +324,10 @@ export default function SettingsPage() {
                     </p>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="email" className="flex items-center justify-between">
+                    <Label
+                      htmlFor="email"
+                      className="flex items-center justify-between"
+                    >
                       Email
                       {emailError && (
                         <span className="text-xs font-normal text-destructive flex items-center">
@@ -320,7 +346,10 @@ export default function SettingsPage() {
                         className={emailError ? "border-destructive" : ""}
                       />
                       {hasLinkedEmail() && (
-                        <Badge variant="outline" className="ml-2 bg-green-50 text-green-700 border-green-200">
+                        <Badge
+                          variant="outline"
+                          className="ml-2 bg-green-50 text-green-700 border-green-200"
+                        >
                           <Mail className="mr-1 h-3 w-3" />
                           Verified
                         </Badge>
@@ -332,10 +361,17 @@ export default function SettingsPage() {
                   </div>
                 </CardContent>
                 <CardFooter className="flex justify-between">
-                  <Button variant="outline" type="button" onClick={() => logout()}>
+                  <Button
+                    variant="outline"
+                    type="button"
+                    onClick={() => logout()}
+                  >
                     Disconnect
                   </Button>
-                  <Button type="submit" disabled={isUpdatingProfile || !profileChanged}>
+                  <Button
+                    type="submit"
+                    disabled={isUpdatingProfile || !profileChanged}
+                  >
                     {isUpdatingProfile ? "Saving..." : "Save Changes"}
                   </Button>
                 </CardFooter>
@@ -347,19 +383,29 @@ export default function SettingsPage() {
             <Card>
               <CardHeader>
                 <CardTitle>Wallet Management</CardTitle>
-                <CardDescription>Connect and manage your crypto wallets.</CardDescription>
+                <CardDescription>
+                  Connect and manage your crypto wallets.
+                </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 {hasWallet ? (
                   <div className="space-y-4">
                     <h3 className="text-sm font-medium">Connected Wallets</h3>
                     {linkedWallets.map((wallet) => (
-                      <div key={wallet.address} className="flex items-center justify-between p-3 border rounded-md">
+                      <div
+                        key={wallet.address}
+                        className="flex items-center justify-between p-3 border rounded-md"
+                      >
                         <div className="flex items-center gap-2">
                           <Wallet className="h-5 w-5 text-primary" />
                           <div>
-                            <p className="font-medium">{`${wallet.address.slice(0, 6)}...${wallet.address.slice(-4)}`}</p>
-                            <p className="text-xs text-muted-foreground">Chain: {wallet.chainId}</p>
+                            <p className="font-medium">{`${wallet.address.slice(
+                              0,
+                              6
+                            )}...${wallet.address.slice(-4)}`}</p>
+                            <p className="text-xs text-muted-foreground">
+                              Chain: {wallet.chainId}
+                            </p>
                           </div>
                         </div>
                         <Button
@@ -376,7 +422,9 @@ export default function SettingsPage() {
                   </div>
                 ) : (
                   <Alert>
-                    <AlertDescription>You don't have any wallets connected to your account yet.</AlertDescription>
+                    <AlertDescription>
+                      You don't have any wallets connected to your account yet.
+                    </AlertDescription>
                   </Alert>
                 )}
 
@@ -391,7 +439,8 @@ export default function SettingsPage() {
                     <DialogHeader>
                       <DialogTitle>Connect Wallet</DialogTitle>
                       <DialogDescription>
-                        Enter your Ethereum wallet address to connect it to your account.
+                        Enter your Ethereum wallet address to connect it to your
+                        account.
                       </DialogDescription>
                     </DialogHeader>
                     <form onSubmit={handleLinkWallet}>
@@ -402,18 +451,31 @@ export default function SettingsPage() {
                             id="walletAddress"
                             placeholder="0x..."
                             value={newWalletAddress}
-                            onChange={(e) => setNewWalletAddress(e.target.value)}
+                            onChange={(e) =>
+                              setNewWalletAddress(e.target.value)
+                            }
                           />
                           <p className="text-xs text-muted-foreground">
-                            Enter a valid Ethereum wallet address starting with 0x.
+                            Enter a valid Ethereum wallet address starting with
+                            0x.
                           </p>
                         </div>
                       </div>
                       <DialogFooter>
-                        <Button variant="outline" type="button" onClick={() => setIsDialogOpen(false)}>
+                        <Button
+                          variant="outline"
+                          type="button"
+                          onClick={() => setIsDialogOpen(false)}
+                        >
                           Cancel
                         </Button>
-                        <Button type="submit" disabled={isLinkingWallet || !newWalletAddress.startsWith("0x")}>
+                        <Button
+                          type="submit"
+                          disabled={
+                            isLinkingWallet ||
+                            !newWalletAddress.startsWith("0x")
+                          }
+                        >
                           {isLinkingWallet ? "Connecting..." : "Connect Wallet"}
                         </Button>
                       </DialogFooter>
@@ -428,29 +490,49 @@ export default function SettingsPage() {
             <Card>
               <CardHeader>
                 <CardTitle>Appearance Settings</CardTitle>
-                <CardDescription>Customize how Echo Verse looks and feels.</CardDescription>
+                <CardDescription>
+                  Customize how Echo Verse looks and feels.
+                </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex items-center justify-between">
                   <div>
                     <Label htmlFor="darkMode">Dark Mode</Label>
-                    <p className="text-sm text-muted-foreground">Use a darker color theme for Echo Verse.</p>
+                    <p className="text-sm text-muted-foreground">
+                      Use a darker color theme for Echo Verse.
+                    </p>
                   </div>
-                  <Switch id="darkMode" checked={darkMode} onCheckedChange={setDarkMode} />
+                  <Switch
+                    id="darkMode"
+                    checked={darkMode}
+                    onCheckedChange={setDarkMode}
+                  />
                 </div>
                 <div className="flex items-center justify-between">
                   <div>
                     <Label htmlFor="highContrast">High Contrast</Label>
-                    <p className="text-sm text-muted-foreground">Increase contrast for better visibility.</p>
+                    <p className="text-sm text-muted-foreground">
+                      Increase contrast for better visibility.
+                    </p>
                   </div>
-                  <Switch id="highContrast" checked={highContrast} onCheckedChange={setHighContrast} />
+                  <Switch
+                    id="highContrast"
+                    checked={highContrast}
+                    onCheckedChange={setHighContrast}
+                  />
                 </div>
                 <div className="flex items-center justify-between">
                   <div>
                     <Label htmlFor="reducedMotion">Reduced Motion</Label>
-                    <p className="text-sm text-muted-foreground">Minimize animations throughout the interface.</p>
+                    <p className="text-sm text-muted-foreground">
+                      Minimize animations throughout the interface.
+                    </p>
                   </div>
-                  <Switch id="reducedMotion" checked={reducedMotion} onCheckedChange={setReducedMotion} />
+                  <Switch
+                    id="reducedMotion"
+                    checked={reducedMotion}
+                    onCheckedChange={setReducedMotion}
+                  />
                 </div>
               </CardContent>
               <CardFooter>
@@ -465,22 +547,36 @@ export default function SettingsPage() {
             <Card>
               <CardHeader>
                 <CardTitle>Playback Settings</CardTitle>
-                <CardDescription>Customize your music playback experience.</CardDescription>
+                <CardDescription>
+                  Customize your music playback experience.
+                </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex items-center justify-between">
                   <div>
                     <Label htmlFor="autoplay">Autoplay</Label>
-                    <p className="text-sm text-muted-foreground">Automatically play music when you open Echo Verse.</p>
+                    <p className="text-sm text-muted-foreground">
+                      Automatically play music when you open Echo Verse.
+                    </p>
                   </div>
-                  <Switch id="autoplay" checked={autoplay} onCheckedChange={setAutoplay} />
+                  <Switch
+                    id="autoplay"
+                    checked={autoplay}
+                    onCheckedChange={setAutoplay}
+                  />
                 </div>
                 <div className="flex items-center justify-between">
                   <div>
                     <Label htmlFor="crossfade">Crossfade</Label>
-                    <p className="text-sm text-muted-foreground">Smoothly transition between songs.</p>
+                    <p className="text-sm text-muted-foreground">
+                      Smoothly transition between songs.
+                    </p>
                   </div>
-                  <Switch id="crossfade" checked={crossfade} onCheckedChange={setCrossfade} />
+                  <Switch
+                    id="crossfade"
+                    checked={crossfade}
+                    onCheckedChange={setCrossfade}
+                  />
                 </div>
                 <div className="flex items-center justify-between">
                   <div>
@@ -489,7 +585,11 @@ export default function SettingsPage() {
                       Maintain consistent volume levels across different tracks.
                     </p>
                   </div>
-                  <Switch id="normalizeVolume" checked={normalizeVolume} onCheckedChange={setNormalizeVolume} />
+                  <Switch
+                    id="normalizeVolume"
+                    checked={normalizeVolume}
+                    onCheckedChange={setNormalizeVolume}
+                  />
                 </div>
               </CardContent>
               <CardFooter>
@@ -502,6 +602,5 @@ export default function SettingsPage() {
         </Tabs>
       </div>
     </MainLayout>
-  )
+  );
 }
-
