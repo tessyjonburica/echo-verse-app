@@ -75,10 +75,10 @@ export default function SettingsPage() {
 
     // Initialize form with user data if available
     if (user) {
-      // Set display name from primary identifier or user's custom display name
-      const displayName = user.displayName || getPrimaryIdentifier()
-      setDisplayName(displayName)
-      setOriginalDisplayName(displayName)
+      // Get display name from primary identifier or user's custom display name
+      const displayNameValue = user.displayName || getPrimaryIdentifier()
+      setDisplayName(displayNameValue)
+      setOriginalDisplayName(displayNameValue)
 
       // Set email if available
       let userEmail = ""
