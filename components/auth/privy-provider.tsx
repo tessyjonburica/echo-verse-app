@@ -43,7 +43,6 @@ export function PrivyProvider({ children }: PrivyProviderProps) {
         appearance: {
           theme: "light",
           accentColor: "#7c3aed",
-          borderRadius: 8,
         },
       }}
     >
