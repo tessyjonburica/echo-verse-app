@@ -168,16 +168,14 @@ export default function SettingsPage() {
 
         toast({
           title: "Profile updated",
-          description:
-            "Your profile information has been updated successfully.",
+          description: "Your profile information has been updated successfully.",
         });
       }
     } catch (error) {
       console.error("Error updating profile:", error);
       toast({
         title: "Error updating profile",
-        description:
-          "There was an error updating your profile. Please try again.",
+        description: "There was an error updating your profile. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -273,8 +271,11 @@ export default function SettingsPage() {
   }
 
   // Get linked wallets - ensure we're not rendering objects directly
-  const linkedWallets = user?.linkedAccounts?.wallet || [];
-  const hasWallet = linkedWallets.length > 0;
+  const linkedWallets = 
+  user?.linkedAccounts && 
+  !Array.isArray(user.linkedAccounts) && 
+  user.linkedAccounts.wallet ? user.linkedAccounts.wallet : [];
+const hasWallet = linkedWallets.length > 0;
 
   return (
     <MainLayout>
