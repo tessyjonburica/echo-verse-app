@@ -12,9 +12,11 @@ const Dialog = CustomDialog
 const CustomDialogTrigger = DialogPrimitive.Trigger
 const DialogTrigger = CustomDialogTrigger
 
-const CustomDialogPortal = ({ className, children, ...props }: DialogPrimitive.DialogPortalProps) => (
-  <DialogPrimitive.Portal className={cn(className)} {...props}>
-    <div className="fixed inset-0 z-50 flex items-start justify-center sm:items-center">{children}</div>
+const CustomDialogPortal = ({ children, ...props }: DialogPrimitive.DialogPortalProps) => (
+  <DialogPrimitive.Portal {...props}>
+    <div className="fixed inset-0 z-50 flex items-start justify-center sm:items-center">
+      {children}
+    </div>
   </DialogPrimitive.Portal>
 )
 CustomDialogPortal.displayName = DialogPrimitive.Portal.displayName
@@ -109,4 +111,3 @@ export {
   DialogTitle,
   DialogTrigger,
 }
-
