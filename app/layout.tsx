@@ -8,6 +8,7 @@ import { PlaylistProvider } from "@/providers/playlist-provider";
 import { PlaybackProvider } from "@/providers/playback-provider";
 import { AuthGuard } from "@/components/auth/auth-guard";
 import { ClientProviders } from "@/components/providers/client-providers";
+import { Analytics } from "@vercel/analytics/react";
 import "./globals.css";
 
 const inter = Inter({
@@ -67,6 +68,7 @@ export default function RootLayout({
             </PlaylistProvider>
           </ThemeProvider>
         </PrivyProvider>
+        <Analytics />
       </body>
     </html>
   );
