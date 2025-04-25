@@ -1,5 +1,4 @@
-// Mock IPFS service for decentralized content storage and retrieval
-
+// Mock IPFS service for decentralized content storage and r
 export interface IPFSContent {
   cid: string
   name: string
